@@ -1,0 +1,26 @@
+{% extends 'account/layout.html' %}
+{% block content %}
+       
+<div class="container theme-showcase" role="main">
+    <br><br><br><br>
+    
+    <div class="col-md-2 column"></div>
+    <div class="col-md-8 column">
+        <div class="jumbotron"> 
+            <div class="text-center" ><h3>{{query}} -- 校区列表 <h3></div> 
+            {% for d in campus %}                 
+                <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
+                    <form action='/self/building/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
+                        {% csrf_token %}
+                        <input  name='campus'  value='{{d}}'  style="display:none" type='text'>
+                        <input  name='building'  value='{{building}}'  style="display:none" type='text'>
+                        <input  name='query'  value='{{query}}'  style="display:none" type='text'>
+                    </form>
+                    {{d}}
+                </a>
+                <br><br>      
+            {% endfor %}
+        </div>        
+    </div>
+</div>
+{% endblock %}

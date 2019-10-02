@@ -1,0 +1,43 @@
+{% extends 'account/layout.html' %}
+{% block content %}
+       
+<div class="container theme-showcase" role="main">
+    <br><br><br>   
+
+    <div class="col-md-2 column"></div>
+    <div class="col-md-8 column">
+        <div class="jumbotron" style="height:700px;">            
+            <div class="text-center"><h3> {{cleanData.campus}} -- {{cleanData.building}} -- {{cleanData.room}} -- 教室课程安排表 </h3>
+            </div>
+            {% include 'account/update_downdate.html' %}
+        <div class="text-center">{{data_str}} -- 星期{{weekday}}</div>         
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>               
+                    <th>课节</th>                   
+                    <th>课程名称</th>
+                    <th>教师名称</th>
+                    <th>课程安排</th>                
+                </tr>
+            </thead>
+            <tbody>       
+                {% for d in mlist %}
+                    <tr>
+                        <td>{{ d.j}}</td>
+
+                        {% if d.KCMC %}  
+                        <td><a href='/course/list/?kcmc={{d.KCMC}}&date={{data_str}}&t={{d.TEACHER_NAME}}&cid={{d.CLASSROOM_ID}}'><i class="fa fa-university" aria-hidden="true">{{ d.KCMC }}</i></a> </td> 
+                        {% endif %}
+                        <td>{{ d.TEACHER_NAME}}</td> 
+                        <td>{{ d.START_TIME}}</td> 
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+</div>
+{% endblock %}
