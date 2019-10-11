@@ -1,13 +1,11 @@
-{% extends 'account/layout.html' %}
-{% block content %}
-       
+{% extends "base.html" %}
+{% block body %}
 <div class="container theme-showcase" role="main">
-    <br><br><br><br>
-    
-    <div class="col-md-2 column"></div>
-    <div class="col-md-8 column">
+    <br><br><br><br>   
+    <div class="col-md-1 column"></div>
+    <div class="col-md-10 column">
         <div class="jumbotron"> 
-            <div class="text-center" ><h3>查询列表 <h3></div> 
+            <div class="text-center" ><h3>华东理工课程管理 查询列表 <h3></div> 
             {% for d in querys %}                 
                 <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
                     <form action='/query/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
@@ -17,7 +15,7 @@
                     {{d}}
                 </a>
                 <br><br>      
-            {% endfor %}
+            {% endfor %}           
         </div>        
     </div>
 </div>

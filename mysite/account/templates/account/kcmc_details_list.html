@@ -1,12 +1,11 @@
-{% extends 'account/layout.html' %}
-{% block content %}
-       
+{% extends "base.html" %}
+{% block body %}
 <div class="container theme-showcase" role="main">
-    <br><br><br>   
-
-   
     <div class="col-md-12 column">
-        <div class="jumbotron" style="height:700px;">            
+        <a href='/' class="btn btn-lg btn-success btn-block"  > 返回 </a> 
+    </div><br><br><br>  
+    <div class="col-md-12 column">
+        <div class="jumbotron">            
             <div class="text-center"><h3> {{cleanData.campus}} -- {{cleanData.building}} -- {{cleanData.room}} -- 教室课程安排表 </h3>
             </div>
             {% include 'account/update_downdate.html' %}

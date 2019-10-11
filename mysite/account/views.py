@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Classroom, Schedule
 from myAPI.pageAPI import djangoPage,PAGE_NUM,toInt
 from myAPI.dateAPI import get_year_weekday, get_weekday, get_date
+from myAPI.listAPI import pinyin
 
 def _getOperators():
     operators = Group.objects.get(name='Operator').user_set.all()
@@ -213,7 +214,6 @@ def _filter_model(models, date_str):
 
 
 #课程查询、自习室查询 查询 
-@login_required
 def query_list(request):
     operators = _getOperators()
     querys = ['课程查询','自习室查询']
@@ -231,12 +231,14 @@ def building_list(request):
     operators = _getOperators()
     cleanData = request.GET.dict()
     campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表    
+    campus_list = pinyin(campus_list)
     if request.method == 'POST':     
         cleanData = request.POST.dict()
         for campus in campus_list:
             if campus == cleanData.get('campus',''):
                 buildings = list(set(Classroom.objects.filter(\
                     CAMPUS=campus).values_list('BUILDING', flat=True))) #教学楼列表 
+                buildings = pinyin(buildings)
                 return render(request, 'account/building_list.html', context=locals())        
     return render(request, 'account/campus_list.html', context=locals())
 
@@ -248,6 +250,7 @@ def room_list(request):
         cleanData = request.POST.dict()
         rooms = list(set(Classroom.objects.filter(BUILDING =\
             cleanData.get('building','')).values_list('ROOM_NAME', flat=True))) #教室列表         
+        rooms = pinyin(rooms)
     return render(request, 'account/room_list.html', context=locals())    
         
 
@@ -290,15 +293,14 @@ def kcmc_details(request):
 def course_list(request):
     operators = _getOperators()
     cleanData = request.GET.dict()
-    date_str = cleanData.get('date','')
-    cid = cleanData.get('cid','')
+    date_str = cleanData.get('date','2000-01-01')
+    cid = cleanData.get('cid',1)
     
     weekday = get_weekday(date_str) 
     models = Schedule.objects.filter(KCMC = cleanData.get('kcmc',''),\
                         TEACHER_NAME = cleanData.get('t',''))
     data_list = _filter_model(models, date_str)
     campus = Classroom.objects.filter(ROOM_ID=cid).first().CAMPUS
-
     building = Classroom.objects.filter(ROOM_ID=cid).first().BUILDING
     room = Classroom.objects.filter(ROOM_ID=cid).first().ROOM_NAME
     return render(request, 'account/course_details_list.html', context=locals())
@@ -310,12 +312,14 @@ def self_building_list(request):
     operators = _getOperators()
     query = request.GET.get('query', '')
     campus = list(set(Classroom.objects.values_list('CAMPUS', flat=True)))#校区列表 
+    campus = pinyin(campus)
     if request.method == 'POST':     
         cleanData = request.POST.dict()
         query = cleanData.get('query', '') #查询
         campus = cleanData.get('campus','') #校区
         buildings = list(set(Classroom.objects.filter(\
                     CAMPUS=campus).values_list('BUILDING', flat=True))) #教学楼列表 
+        buildings = pinyin(buildings)
         return render(request, 'account/self_building_list.html', context=locals())        
     return render(request, 'account/self_campus_list.html', context=locals())
 
@@ -338,9 +342,8 @@ def self_study_list(request):
     weekday = get_weekday(data_str) 
               
     #获得 教室类型为多媒体教室的id 
-    room_ids = list(set(Classroom.objects.filter(TYPE__icontains = \
-            '多媒体教室', CAMPUS__icontains = campus,\
-            BUILDING__icontains = building).values_list('ROOM_ID', flat=True)))
+    room_ids = list(set(Classroom.objects.filter(TYPE = '多媒体教室', CAMPUS = campus,\
+            BUILDING = building).values_list('ROOM_ID', flat=True)))
 
     models = Schedule.objects.filter(CLASSROOM_ID='xxxx') #空记录   
     for room_id in room_ids:
@@ -352,7 +355,7 @@ def self_study_list(request):
         #获得教室名列表
         classroom_names = list(set(datas.filter().values_list('CLASSROOM_NAME', flat=True)))
         for classroom_name in classroom_names:
-            model_list = datas.filter(CLASSROOM_NAME__icontains=classroom_name)   
+            model_list = datas.filter(CLASSROOM_NAME=classroom_name)   
             mlist = ['','','','','','','','','','','','']
                
             for model in model_list:  
@@ -362,7 +365,7 @@ def self_study_list(request):
                     mlist[n] = (n+1)
          
             if any(mlist):
-                mlist.insert(0, classroom_name) #插入             
+                mlist.insert(0, classroom_name) #插入教室名             
                 data_list.append(mlist)   
     return render(request, 'account/self_study_list.html', context=locals()) 
    

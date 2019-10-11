@@ -16,31 +16,29 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView   #self_study_list
+from django.views.generic import RedirectView  
 from account import views
 urlpatterns = [
     url(r'^test/$', views.test, name="test"),
     
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-    url(r'^(?P<path>assets(/.*))$', RedirectView.as_view(url='/static/%(path)s', query_string=True)),
     url(r'^admin/', admin.site.urls),
 
-    url(r'^classromm/list/', views.classromm_list, name="classromm_list"),
-    url(r'^(?P<page>\d*)?$', views.schedule_list, name="schedule_list"),
+    url(r'^classromm/list/$', views.classromm_list, name="classromm_list"),
+    url(r'^schedule/list/(?P<page>\d*)?$', views.schedule_list, name="schedule_list"),
     url(r'^romm/list/(?P<page>\d*)?$', views.romm_list, name="romm_list"),  
     url(r'^schedule/import/$', views.schedule_import, name="schedule_import"),
     url(r'^classromm/import/$', views.classromm_import, name="classromm_import"),
 
     url(r'^building/list/$', views.building_list, name="building_list"),
     url(r'^room/list/$', views.room_list, name="room_list"),
-    url(r'^kcmc/details/', views.kcmc_details, name="kcmc_details"),
+    url(r'^kcmc/details/$', views.kcmc_details, name="kcmc_details"),
     
-    url(r'^self/study/list/', views.self_study_list, name="self_study_list"),
-    url(r'^query/list/', views.query_list, name="query_list"), 
-    url(r'^self/building/list/', views.self_building_list, name="self_building_list"), 
+    url(r'^self/study/list/$', views.self_study_list, name="self_study_list"),
+    url(r'^self/building/list/$', views.self_building_list, name="self_building_list"), 
     
-    url(r'^schedule/filter/', views.schedule_filter, name="schedule_filter"),
-    url(r'^course/list/', views.course_list, name="course_list"),      
-       
+    url(r'^schedule/filter/$', views.schedule_filter, name="schedule_filter"),
+    url(r'^course/list/$', views.course_list, name="course_list"),      
+    url(r'^', views.query_list, name="query_list"),    
 ]
