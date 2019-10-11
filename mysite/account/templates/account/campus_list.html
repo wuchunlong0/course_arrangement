@@ -8,12 +8,12 @@
         <div class="jumbotron"> 
             <div class="text-center" ><h3>{{cleanData.query}} -- 校区列表 <h3></div> 
             {% for d in campus_list %}                 
-                <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
-                    <form action='/building/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
+                <a href='#' class='btn btn-lg btn-danger btn-block' onclick="document.getElementById('{{forloop.counter}}').submit();" />
+                    <form action='/building/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data' />
                         {% csrf_token %}
-                        <input  name='campus'  value='{{d}}'  style="display:none" type='text'>
+                        <input  name='campus'  value='{{d}}'  style='display:none' type='text'>
                         {% for key, value in cleanData.items %}
-                            <input  name= "{{key}}"  value= "{{value}}"  style="display:none" type='text'>
+                            <input name="{{key}}" value="{{value}}"  style='display:none' type='text'>
                         {% endfor %} 
                     </form>
                     {{d}}
