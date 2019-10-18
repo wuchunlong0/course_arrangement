@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os,datetime,xlrd
+import os,datetime,xlrd,copy
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Classroom, Schedule
 from myAPI.pageAPI import djangoPage,PAGE_NUM,toInt
 from myAPI.dateAPI import get_year_weekday, get_weekday, get_date
-from myAPI.listAPI import pinyin
+from myAPI.listAPI import pinyin, get_english
 
 def _getOperators():
     operators = Group.objects.get(name='Operator').user_set.all()
@@ -217,12 +217,15 @@ def _filter_model(models, date_str):
 def query_list(request):
     operators = _getOperators()
     querys = ['课程查询','自习室查询']
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表 
     if request.method == 'POST':
-        query = request.POST.get('query', '')
-        if query == querys[0]:
-            return HttpResponseRedirect('/building/list/?query=%s' %query)
-        if query == querys[1]:
-            return HttpResponseRedirect('/self/building/list/?query=%s' %query)
+        cleanData = request.POST.dict()
+        dict.pop(cleanData,'csrfmiddlewaretoken') #删除字典中的键'csrfmiddlewaretoken'和值
+        queryString = '?'+'&'.join(['%s=%s' % (k,v) for k,v in cleanData.items()]) 
+        if cleanData['query'] == querys[0]:
+            return HttpResponseRedirect('/building/list/%s' %queryString)
+        if cleanData['query'] == querys[1]:
+            return HttpResponseRedirect('/self/building/list/%s' %queryString)
     return render(request, 'account/query_list.html', context=locals()) 
 
 #课程查询   
@@ -230,16 +233,21 @@ def query_list(request):
 def building_list(request):
     operators = _getOperators()
     cleanData = request.GET.dict()
-    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表    
+    cleanData_query = copy.deepcopy(cleanData) #深度拷贝, 两者完全独立
+    if cleanData_query.get('query',''):
+        dict.pop(cleanData_query,'query')
+    campus_list = list(cleanData_query.values())#校区列表    
     campus_list = pinyin(campus_list)
+    
     if request.method == 'POST':     
         cleanData = request.POST.dict()
-        for campus in campus_list:
-            if campus == cleanData.get('campus',''):
-                buildings = list(set(Classroom.objects.filter(\
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+        if cleanData.get('campus',''):
+            campus = cleanData['campus']
+            buildings = list(set(Classroom.objects.filter(\
                     CAMPUS=campus).values_list('BUILDING', flat=True))) #教学楼列表 
-                buildings = pinyin(buildings)
-                return render(request, 'account/building_list.html', context=locals())        
+            buildings = pinyin(buildings)
+            return render(request, 'account/building_list.html', context=locals())        
     return render(request, 'account/campus_list.html', context=locals())
 
 
@@ -305,20 +313,36 @@ def course_list(request):
     room = Classroom.objects.filter(ROOM_ID=cid).first().ROOM_NAME
     return render(request, 'account/course_details_list.html', context=locals())
 
-
+# def get_list_abc(mylist):
+#     """判断一个unicode是否是英文字母"""        
+#     mlist = []
+#     for uchar in mylist:  
+#         if  ('\u0041'  <=  uchar<='\u005a')  or  ('\u0061'  <=  uchar<='\u007a'):
+#             mlist.append(uchar) 
+#     mlist.sort()
+#     return  mlist
+  
 #自习室查询
 #校区 -- 教学楼列表
 def self_building_list(request):
     operators = _getOperators()
-    query = request.GET.get('query', '')
-    campus = list(set(Classroom.objects.values_list('CAMPUS', flat=True)))#校区列表 
-    campus = pinyin(campus)
+    cleanData = request.GET.dict()
+    cleanData_query = copy.deepcopy(cleanData) #深度拷贝, 两者完全独立
+    if cleanData_query.get('query',''):
+        dict.pop(cleanData_query,'query')
+    campus_list = list(cleanData_query.values())#校区列表    
+    campus_list = pinyin(campus_list)
+    
+    
     if request.method == 'POST':     
         cleanData = request.POST.dict()
-        query = cleanData.get('query', '') #查询
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+        
         campus = cleanData.get('campus','') #校区
         buildings = list(set(Classroom.objects.filter(\
                     CAMPUS=campus).values_list('BUILDING', flat=True))) #教学楼列表 
+        if campus == '奉贤校区':
+            buildings = get_english(buildings)
         buildings = pinyin(buildings)
         return render(request, 'account/self_building_list.html', context=locals())        
     return render(request, 'account/self_campus_list.html', context=locals())
@@ -333,7 +357,8 @@ def self_study_list(request):
     cleanData = request.GET.dict()  
     if request.method == 'POST':
         cleanData = request.POST.dict()
-        
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+        print('cleanData =', cleanData)
     data_str,count = get_update_downdate(cleanData) # 2019-09-28,0  
           
     query,campus,building,room = cleanData.get('query',''),cleanData.get('campus',''),\
@@ -365,7 +390,8 @@ def self_study_list(request):
                     mlist[n] = (n+1)
          
             if any(mlist):
-                mlist.insert(0, classroom_name) #插入教室名             
+                mlist.insert(0, classroom_name) #插入教室名
+                mlist.insert(1,Classroom.objects.filter(ROOM_NAME=classroom_name).first().TYPE)#插入教室类型      
                 data_list.append(mlist)   
     return render(request, 'account/self_study_list.html', context=locals()) 
    

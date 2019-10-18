@@ -16,6 +16,7 @@
             <thead>
             <tr>
                 <th>教室名称</th>
+                <th>教室类型</th>
                 <th>第01节</th>
                 <th>第02节</th>
                 <th>第03节</th>
@@ -35,7 +36,7 @@
                 <tr>
 
                     {% for d in data %}
-                        {% if d >= 1 and d <= 12 %}    
+                        {% if d >= 1 and d <= 13 %}    
                             <td><div style="background:#3ACC3A;">{{d}}</div></td>
                         {% else %}
                             <td>{{d}}</td>

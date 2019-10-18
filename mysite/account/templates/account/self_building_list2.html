@@ -8,17 +8,16 @@
     <div class="col-md-12 column">
         <div class="jumbotron"> 
             <div class="text-center" ><h3>{{cleanData.query}} -- {{cleanData.campus}}  <h3></div> 
-            {% for b in buildings %}                 
+            {% for d in buildings %}                 
                 <div class="col-md-4 column">
-                <a href="#" class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
-                    <form action="/self/study/list/" method="post" name="{{forloop.counter}}" id="{{forloop.counter}}" enctype="multipart/form-data">
+                <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
+                    <form action='/self/study/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
                         {% csrf_token %}
-                        <input name= "building" value= "{{b}}" style="display:none" type="text">
-                        {% for key, value in cleanData.items %}
-                            <input name= "{{key}}" value= "{{value}}" style="display:none" type="text">
-                        {% endfor %}
+                        <input  name='building'  value='{{d}}'  style="display:none" type='text'>
+                        <input  name='campus'  value='{{campus}}'  style="display:none" type='text'>
+                        <input  name='query'  value='{{query}}'  style="display:none" type='text'>
                     </form>
-                    {{b}}
+                    {{d}}
                 </a>
                 
                 </div>

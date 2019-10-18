@@ -26,12 +26,21 @@ def pinyin(mylist):
     return mylist
 
 
+def get_english(mylist):
+    """获得列表元素中的全部是英文的元素
+    mylist = ['aX','bY26','cZ ABC', 'XY工训中心', 'A', '实验六楼', 'C', 'D', '体育馆', '活动中心', '实验二楼', 'B', '化学实验楼', '实验四楼', '图书馆', 'E']
+    返回 ['A', 'B', 'C', 'D', 'E', 'aX']    
+    """        
+    mlist = []
+    for m in mylist:  
+        if m.encode('utf-8').isalpha():
+            mlist.append(m) 
+    mlist.sort()
+    return  mlist
 
 def get_sum(mylist):
     '''获得列表元素和 返回浮点数字字符串，保留2位小数。[1,2,3] --> '6.00' '''
     return str(Decimal(sum(mylist)).quantize(Decimal('0.00')))
-
-
 
 
 def get_average(mylist):

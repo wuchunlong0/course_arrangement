@@ -5,14 +5,21 @@
     <div class="col-md-1 column"></div>
     <div class="col-md-10 column">
         <div class="jumbotron"> 
-            <div class="text-center" ><h3>华东理工课程管理 查询列表 <h3></div> 
-            {% for d in querys %}                 
-                <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
-                    <form action='/query/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
-                        {% csrf_token %}
-                        <input  name='query'  value='{{d}}'  style="display:none" type='text'>
-                    </form>
-                    {{d}}
+            <div class="text-center" ><h3>华东理工课程管理 查询列表 <h3></div>
+
+            {% for query in querys %}                                
+                <form action='/query/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    <input  name='query' value='{{query}}' style="display:none" type='text'>
+                    {% for campus in campus_list %}
+                        <label class="checkbox-inline">
+                            <input name="{{campus}}" type="checkbox" value="{{campus}}" checked> {{campus}}
+                        </label>
+                    {% endfor %} 
+                </form>
+
+                <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();"/>
+                    {{query}}
                 </a>
                 <br><br>      
             {% endfor %}           

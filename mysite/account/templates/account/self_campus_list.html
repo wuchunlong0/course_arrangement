@@ -7,16 +7,18 @@
  
     <div class="col-md-12 column">
         <div class="jumbotron"> 
-            <div class="text-center" ><h3>{{query}} -- 校区列表 <h3></div> 
-            {% for d in campus %}                 
+            <div class="text-center" ><h3>{{cleanData.query}} -- 校区列表 <h3></div> 
+            {% for c in campus_list %}                 
                 <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{forloop.counter}}').submit();" >
                     <form action='/self/building/list/' method='post' name='{{forloop.counter}}' id='{{forloop.counter}}' enctype='multipart/form-data'>
                         {% csrf_token %}
-                        <input  name='campus'  value='{{d}}'  style="display:none" type='text'>
-                        <input  name='building'  value='{{building}}'  style="display:none" type='text'>
-                        <input  name='query'  value='{{query}}'  style="display:none" type='text'>
+                        <input  name='campus'  value='{{c}}'  style="display:none" type='text'>
+                        {% for key, value in cleanData.items %}
+                            <input name="{{key}}" value="{{value}}"  style='display:none' type='text'>
+                        {% endfor %}
+                        
                     </form>
-                    {{d}}
+                    {{c}}
                 </a>
                 <br><br>      
             {% endfor %}
