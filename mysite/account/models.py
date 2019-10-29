@@ -36,3 +36,12 @@ class Schedule(models.Model):
     def __str__(self):
         return self.KCMC
 
+class Campusname(models.Model):
+    CAMPUS = models.CharField(verbose_name='校区', max_length=16, null=True, blank=True)    
+    def __str__(self):
+        return self.CAMPUS
+
+    
+    
+    
+    

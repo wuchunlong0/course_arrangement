@@ -6,7 +6,7 @@ from django.http.response import HttpResponseRedirect, HttpResponse,\
     StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
 
-from .models import Classroom, Schedule
+from .models import Classroom, Schedule, Campusname
 from myAPI.pageAPI import djangoPage,PAGE_NUM,toInt
 from myAPI.dateAPI import get_year_weekday, get_weekday, get_date
 from myAPI.listAPI import pinyin, get_english
@@ -51,6 +51,7 @@ def get_update_downdate(cleanData):
     if downdate: count += 1 #下一天   
     data_str = date if date else get_date(count)    
     return data_str,count
+
         
 def test(request):
     date_str = '2019-09-02'
@@ -213,32 +214,90 @@ def _filter_model(models, date_str):
     return  model
 
 
+
+SEARCH_LIST = ['按教室分布查','按课程名称查','按教师名称查'] #查询列表
+
 #课程查询、自习室查询 查询 
 def query_list(request):
     operators = _getOperators()
-    querys = ['课程查询','自习室查询']
-    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表 
+    query_list = ['课程查询','自习室查询'] #查询列表
+    
     if request.method == 'POST':
         cleanData = request.POST.dict()
         dict.pop(cleanData,'csrfmiddlewaretoken') #删除字典中的键'csrfmiddlewaretoken'和值
         queryString = '?'+'&'.join(['%s=%s' % (k,v) for k,v in cleanData.items()]) 
-        if cleanData['query'] == querys[0]:
-            return HttpResponseRedirect('/building/list/%s' %queryString)
-        if cleanData['query'] == querys[1]:
+        if cleanData['query'] == query_list[0]:
+            search_list = SEARCH_LIST 
+            return render(request, 'account/class_list.html', context=locals())            
+        
+        if cleanData['query'] == query_list[1]:
             return HttpResponseRedirect('/self/building/list/%s' %queryString)
     return render(request, 'account/query_list.html', context=locals()) 
 
-#课程查询   
-#校区 -- 教学楼列表
+
+def choice(request, page):
+    search_list = SEARCH_LIST 
+    cleanData = request.GET.dict()
+    if request.method == 'POST':
+        cleanData = request.POST.dict()
+        dict.pop(cleanData,'csrfmiddlewaretoken') #删除字典中的键'csrfmiddlewaretoken'和值
+    queryString = '?'+'&'.join(['%s=%s' % (k,v) for k,v in cleanData.items()])
+     
+    #按教室分布查
+    if cleanData.get(search_list[0],''): 
+        return HttpResponseRedirect('/building/list/%s' %queryString)
+
+    #按课程名称查
+    if cleanData.get(search_list[1],''): 
+        return HttpResponseRedirect('/classname/list/%s' %queryString)
+    
+    #按教师姓名查
+    if cleanData.get(search_list[2],''): 
+        return HttpResponseRedirect('/teacher/list/%s' %queryString)
+
+#按教师姓名查
+def teacher_list(request, page):
+    operators = _getOperators()
+    cleanData = request.GET.dict()    
+    models = Schedule.objects.filter()
+    if request.method == 'POST':     
+        cleanData = request.POST.dict()
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+
+    if cleanData.get('teacher', ''): 
+        models = models.filter(TEACHER_NAME__icontains = cleanData['teacher'])
+         
+    queryString = '?'+'&'.join(['%s=%s' % (k,v) for k,v in cleanData.items()])    
+    data_list, pageList, num_pages, page = djangoPage(models,page,PAGE_NUM)  
+    offset = PAGE_NUM * (page - 1) 
+    return render(request, 'account/teacher_list.html', context=locals())
+
+
+#按课程名称查
+def classname_list(request, page):
+    operators = _getOperators()
+    cleanData = request.GET.dict()    
+    models = Schedule.objects.filter()
+    if request.method == 'POST':     
+        cleanData = request.POST.dict()
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+
+    if cleanData.get('kcmc', ''): 
+        models = models.filter(KCMC__icontains = cleanData['kcmc'])
+         
+    queryString = '?'+'&'.join(['%s=%s' % (k,v) for k,v in cleanData.items()])    
+    data_list, pageList, num_pages, page = djangoPage(models,page,PAGE_NUM)  
+    offset = PAGE_NUM * (page - 1) 
+    return render(request, 'account/classname_list.html', context=locals())
+
+
+  
+# 按教室分布查  校区 -- 教学楼列表
 def building_list(request):
     operators = _getOperators()
-    cleanData = request.GET.dict()
-    cleanData_query = copy.deepcopy(cleanData) #深度拷贝, 两者完全独立
-    if cleanData_query.get('query',''):
-        dict.pop(cleanData_query,'query')
-    campus_list = list(cleanData_query.values())#校区列表    
+    cleanData = request.GET.dict()    
+    campus_list = list(set(Campusname.objects.values_list('CAMPUS', flat=True))) #校区列表
     campus_list = pinyin(campus_list)
-    
     if request.method == 'POST':     
         cleanData = request.POST.dict()
         dict.pop(cleanData,'csrfmiddlewaretoken')
@@ -261,7 +320,6 @@ def room_list(request):
         rooms = pinyin(rooms)
     return render(request, 'account/room_list.html', context=locals())    
         
-
 
 #教室、时间 -- 教室课程表
 def kcmc_details(request):  
@@ -312,28 +370,14 @@ def course_list(request):
     building = Classroom.objects.filter(ROOM_ID=cid).first().BUILDING
     room = Classroom.objects.filter(ROOM_ID=cid).first().ROOM_NAME
     return render(request, 'account/course_details_list.html', context=locals())
-
-# def get_list_abc(mylist):
-#     """判断一个unicode是否是英文字母"""        
-#     mlist = []
-#     for uchar in mylist:  
-#         if  ('\u0041'  <=  uchar<='\u005a')  or  ('\u0061'  <=  uchar<='\u007a'):
-#             mlist.append(uchar) 
-#     mlist.sort()
-#     return  mlist
   
 #自习室查询
 #校区 -- 教学楼列表
 def self_building_list(request):
     operators = _getOperators()
-    cleanData = request.GET.dict()
-    cleanData_query = copy.deepcopy(cleanData) #深度拷贝, 两者完全独立
-    if cleanData_query.get('query',''):
-        dict.pop(cleanData_query,'query')
-    campus_list = list(cleanData_query.values())#校区列表    
+    cleanData = request.GET.dict()    
+    campus_list = list(set(Campusname.objects.values_list('CAMPUS', flat=True))) #校区列表
     campus_list = pinyin(campus_list)
-    
-    
     if request.method == 'POST':     
         cleanData = request.POST.dict()
         dict.pop(cleanData,'csrfmiddlewaretoken')
@@ -358,7 +402,6 @@ def self_study_list(request):
     if request.method == 'POST':
         cleanData = request.POST.dict()
         dict.pop(cleanData,'csrfmiddlewaretoken')
-        print('cleanData =', cleanData)
     data_str,count = get_update_downdate(cleanData) # 2019-09-28,0  
           
     query,campus,building,room = cleanData.get('query',''),cleanData.get('campus',''),\

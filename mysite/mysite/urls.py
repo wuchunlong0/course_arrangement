@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView  
 from account import views
 urlpatterns = [
-    url(r'^test/$', views.test, name="test"),
+    url(r'^choice/(?P<page>\d*)?$', views.choice, name="choice"),
     
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
@@ -40,5 +40,10 @@ urlpatterns = [
     
     url(r'^schedule/filter/$', views.schedule_filter, name="schedule_filter"),
     url(r'^course/list/$', views.course_list, name="course_list"),      
+    
+    url(r'^classname/list/(?P<page>\d*)?$', views.classname_list, name="classname_list"), 
+    url(r'^teacher/list/(?P<page>\d*)?$', views.teacher_list, name="teacher_list"),
+    
+    
     url(r'^', views.query_list, name="query_list"),    
 ]
