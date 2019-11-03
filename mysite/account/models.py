@@ -35,12 +35,25 @@ class Schedule(models.Model):
     SHOWTEXT = models.CharField(verbose_name='备注上课安排', max_length=256, null=True, blank=True)    
     def __str__(self):
         return self.KCMC
-
-class Campusname(models.Model):
-    CAMPUS = models.CharField(verbose_name='校区', max_length=16, null=True, blank=True)    
+    
+#校区
+class Campus(models.Model):
+    name = models.CharField(verbose_name='校区名称', max_length=16, null=True, blank=True)     
     def __str__(self):
-        return self.CAMPUS
+        return self.name
+#教学楼
+class Building(models.Model):
+    campus = models.ForeignKey(Campus, on_delete=models.PROTECT)
+    name = models.CharField(verbose_name='教学楼名称', max_length=16, null=True, blank=True)     
+    def __str__(self):
+        return self.name
 
+#教室
+class Room(models.Model):
+    buildings = models.ForeignKey(Building, on_delete=models.PROTECT)    
+    name = models.CharField(verbose_name='教室名称', max_length=16, null=True, blank=True)     
+    def __str__(self):
+        return self.name
     
     
     

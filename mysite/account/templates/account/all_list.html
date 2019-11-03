@@ -1,0 +1,35 @@
+{% extends 'account/layout.html' %}
+{% block content %}
+              
+<div class="container theme-showcase" role="main">
+    <div class="col-md-12 column">
+        <a href='/' class="btn btn-lg btn-success btn-block"  > 返回 </a> 
+    </div><br><br><br>  
+    <div class="col-md-12 column">             
+        {% for dicts in mylist %}                                    
+            {% for key, value in dicts.items %}                                   
+                
+                {% for k, v in value.items %}                             
+                    <form action='#' method='post' name='{{key}}-{{k}}' id='{{key}}-{{k}}' enctype='multipart/form-data'>
+                        {% csrf_token %} 
+                        校区：{{key}} <input type="checkbox" value="{{key}}" name="{{key}}" checked> <br>
+                        教学楼：{{k}} <input type="checkbox" name="{{k}}" value="{{k}}" checked> <br>
+
+                        {% for v1 in v %} 
+                            {{v1}} <input type="checkbox" name="{{v1}}" value="{{v1}}" checked> &nbsp;&nbsp;
+                        {% endfor %}
+
+                        <a href='#' class="btn btn-lg btn-danger btn-block" onclick="document.getElementById('{{key}}-{{k}}').submit();" >
+                            {{key}}-{{k}}
+                        </a>
+                    </form>
+
+                {% endfor %}
+
+            {% endfor %}<br><br>                
+        {% endfor %}
+          
+    </div>
+</div>
+
+{% endblock %}

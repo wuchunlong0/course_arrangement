@@ -6,10 +6,11 @@ from django.http.response import HttpResponseRedirect, HttpResponse,\
     StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
 
-from .models import Classroom, Schedule, Campusname
+from .models import Classroom, Schedule,  Campus,Building,Room
 from myAPI.pageAPI import djangoPage,PAGE_NUM,toInt
 from myAPI.dateAPI import get_year_weekday, get_weekday, get_date
 from myAPI.listAPI import pinyin, get_english
+
 
 def _getOperators():
     operators = Group.objects.get(name='Operator').user_set.all()
@@ -50,12 +51,7 @@ def get_update_downdate(cleanData):
     if update:  count -=  1 #上一天            
     if downdate: count += 1 #下一天   
     data_str = date if date else get_date(count)    
-    return data_str,count
-
-        
-def test(request):
-    date_str = '2019-09-02'
-    return HttpResponse(get_year_whichweek_week(date_str))
+    return data_str,count       
 
 def post_excel_model(request, post_file_excel, model, k):
     ''' Excel文件，多张工作表（数据），导入到数据库
@@ -437,4 +433,42 @@ def self_study_list(request):
                 mlist.insert(1,Classroom.objects.filter(ROOM_NAME=classroom_name).first().TYPE)#插入教室类型      
                 data_list.append(mlist)   
     return render(request, 'account/self_study_list.html', context=locals()) 
-   
+
+#  http://localhost:8000/all/list/
+@login_required
+def all_list(request):
+    mylist = []  #[ {A : {B : [] } },  {A : {B : [] } }, ... ]
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #获得校区 列表 
+    cleanData = request.GET.dict()
+    for campus in campus_list:
+        buildings = list(set(Classroom.objects.filter(CAMPUS=campus).values_list('BUILDING', flat=True)))#获得教学楼 列表 
+        for building in buildings:
+            room_name = list(set(Classroom.objects.filter(CAMPUS=campus,BUILDING=building).values_list('ROOM_NAME', flat=True)))
+            mylist.append({campus : {building : room_name}})
+    if request.method == 'POST':     
+        cleanData = request.POST.dict()
+        dict.pop(cleanData,'csrfmiddlewaretoken')
+    print('cleanData====', cleanData)  
+    return render(request, 'account/all_list.html', context=locals()) 
+
+
+def init_campus():
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #获得校区 列表 
+    for m in campus_list:
+        c = Campus()
+        c.name = m
+        c.save()
+    return ''
+
+def test(request):
+    date_str = '2019-09-02' 
+    init_campus()
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #获得校区 列表 
+    for campus in campus_list:
+        buildings = list(set(Classroom.objects.filter(CAMPUS=campus).values_list('BUILDING', flat=True)))#获得教学楼 列表 
+        for building in buildings:
+            b = Building()
+            b.name = building
+            b.campus = campus
+            b.save()
+    return HttpResponse(get_year_whichweek_week(date_str))

@@ -9,13 +9,13 @@ if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
     django.setup()
     from django.contrib.auth.models import User, Group, Permission
-    from account.models import Classroom, Schedule, Campusname
+    from account.models import Classroom, Schedule
+
     
     #创建组operatorGroup
     operatorGroup = Group.objects.create(name='Operator')    
     operatorGroup.permissions.add(Permission.objects.get(name='Can add classroom'),\
-                                  Permission.objects.get(name='Can add schedule'),\
-                                  Permission.objects.get(name='Can add campusname')) 
+                                  Permission.objects.get(name='Can add schedule')) 
     #创建组customerGroup
     customerGroup = Group.objects.create(name='Customer')   
     User.objects.create_superuser('admin', 'admin@test.com', '1234qazx')
@@ -37,9 +37,9 @@ if __name__ == "__main__":
         user.is_superuser = False
         user.groups.add(customerGroup)
         user.save()   
-     
-    mylist = ['奉贤校区', '徐汇校区'] #'金山校区'
-    for m in mylist:
-        c = Campusname()
-        c.CAMPUS = m
-        c.save()
+    
+    #校区 
+    #mylist = ['奉贤校区','徐汇校区',] #'金山校区'
+         
+        
+        

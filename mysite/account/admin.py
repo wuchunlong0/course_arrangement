@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import Classroom, Schedule, Campusname 
+from .models import Classroom, Schedule, Campus, Building, Room 
 
 @admin.register(Classroom)
 class ClassroomAdmin(admin.ModelAdmin):    
@@ -14,7 +14,15 @@ class ScheduleAdmin(admin.ModelAdmin):
             'TEACHER_NAME','CLASS_TIME','START_TIME','CLASSROOM_NAME',\
             'CLASSROOM_ID','XQ','KS','JS','ZC1','ZC2','SJBZ','SHOWTEXT',)
 
-@admin.register(Campusname)
-class CampusnameAdmin(admin.ModelAdmin):    
-    list_display = ('id','CAMPUS',)
+@admin.register(Campus)
+class CampusAdmin(admin.ModelAdmin):    
+    list_display = ('id','name')
+
+@admin.register(Building)
+class BuildingAdmin(admin.ModelAdmin):    
+    list_display = ('id','campus','name')
+
+@admin.register(Room)
+class RoomAdmin(admin.ModelAdmin):    
+    list_display = ('id','buildings','name')
 
