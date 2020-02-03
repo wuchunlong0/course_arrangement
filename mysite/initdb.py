@@ -38,8 +38,6 @@ if __name__ == "__main__":
         user.groups.add(customerGroup)
         user.save()   
     
-    #校区 
-    #mylist = ['奉贤校区','徐汇校区',] #'金山校区'
          
         
         

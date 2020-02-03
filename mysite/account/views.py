@@ -292,7 +292,7 @@ def classname_list(request, page):
 def building_list(request):
     operators = _getOperators()
     cleanData = request.GET.dict()    
-    campus_list = list(set(Campusname.objects.values_list('CAMPUS', flat=True))) #校区列表
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表
     campus_list = pinyin(campus_list)
     if request.method == 'POST':     
         cleanData = request.POST.dict()
@@ -333,10 +333,8 @@ def kcmc_details(request):
     models = Schedule.objects.filter(CLASSROOM_NAME__icontains = \
             cleanData.get('room', '')) #由教室名 获得记录   信息楼109A
     data_list =  _filter_model(models, data_str) 
-
-    mylist = []
-    for n in range(0,12):
-        mylist.append(['','','',''])
+    
+    mylist = [['']*4] * 12  # [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']]
     
     for model in data_list:  
         ks = model.KS
@@ -372,7 +370,7 @@ def course_list(request):
 def self_building_list(request):
     operators = _getOperators()
     cleanData = request.GET.dict()    
-    campus_list = list(set(Campusname.objects.values_list('CAMPUS', flat=True))) #校区列表
+    campus_list = list(set(Classroom.objects.values_list('CAMPUS', flat=True))) #校区列表
     campus_list = pinyin(campus_list)
     if request.method == 'POST':     
         cleanData = request.POST.dict()
@@ -408,11 +406,13 @@ def self_study_list(request):
     #获得 教室类型为多媒体教室的id 
     room_ids = list(set(Classroom.objects.filter(TYPE = '多媒体教室', CAMPUS = campus,\
             BUILDING = building).values_list('ROOM_ID', flat=True)))
-
+    
+    
     models = Schedule.objects.filter(CLASSROOM_ID='xxxx') #空记录   
     for room_id in room_ids:
-        models = models|Schedule.objects.filter(CLASSROOM_ID=room_id)
+        models = models|Schedule.objects.filter(CLASSROOM_ID__icontains=room_id)
                              
+ 
     data_list = []
     datas = _filter_model(models, data_str) #data_str时间过滤     
     if datas:                        
@@ -420,7 +420,7 @@ def self_study_list(request):
         classroom_names = list(set(datas.filter().values_list('CLASSROOM_NAME', flat=True)))
         for classroom_name in classroom_names:
             model_list = datas.filter(CLASSROOM_NAME=classroom_name)   
-            mlist = ['','','','','','','','','','','','']
+            mlist = [''] * 12   # ['','','','','','','','','','','','']
                
             for model in model_list:  
                 ks = model.KS
@@ -432,6 +432,7 @@ def self_study_list(request):
                 mlist.insert(0, classroom_name) #插入教室名
                 mlist.insert(1,Classroom.objects.filter(ROOM_NAME=classroom_name).first().TYPE)#插入教室类型      
                 data_list.append(mlist)   
+
     return render(request, 'account/self_study_list.html', context=locals()) 
 
 #  http://localhost:8000/all/list/
@@ -469,6 +470,6 @@ def test(request):
         for building in buildings:
             b = Building()
             b.name = building
-            b.campus = campus
+            b.campus = Campus.objects.get(name=campus)
             b.save()
     return HttpResponse(get_year_whichweek_week(date_str))
